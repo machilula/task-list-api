@@ -9,8 +9,13 @@ def create_task():
      
     request_body = request.get_json()
     task = validate_request(request_body)
-    response = task.to_dict()
 
+    db.session.add(task)
+    db.session.commit()
+
+    response = {
+        'task': task.to_dict()
+    }
     return response, 201
 
 def validate_request(request_body):
@@ -23,27 +28,18 @@ def validate_request(request_body):
         abort(make_response(response , 400))
 
     task = Task(title=title, description=description)
-    db.session.add(task)
-    db.session.commit()
-
     return task
 
 @tasks_bp.get("")
 def get_all_tasks():
 
     query = db.select(Task)
-
     tasks = db.session.scalars(query.order_by(Task.id))
 
     tasks_response = []
     for task in tasks:
         tasks_response.append(
-            {
-                "id": task.id,
-                "title": task.title,
-                "description": task.description,   
-                "is_complete": task.check_completion()
-            }
+            task.to_dict()
         )
     return tasks_response
 
@@ -52,7 +48,7 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
 
-    return task.to_dict()
+    return {'task': task.to_dict()}
 
 def validate_task(task_id):
     try:
@@ -70,11 +66,31 @@ def validate_task(task_id):
 
     return task
     
+    # we need to make requests for put and delete to finish wave 1! lets do this!
+@tasks_bp.put("<task_id>")
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+
+    return {'task': task.to_dict()}
+
+@tasks_bp.delete("<task_id>")
+def delete_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return {
+        "details": f'Task {task.id} "{task.title}" successfully deleted'
+        }
 
 
-
-# noice, we made a get request for all tasks and now we need to test it!
-# works on postman GET ! now we need to test it with pytest
 
 
 

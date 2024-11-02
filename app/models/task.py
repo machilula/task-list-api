@@ -14,14 +14,11 @@ class Task(db.Model):
         return self.completed_at
     
     def to_dict(self):
-        return {
-            "task":
-            dict(
+        return dict(
             id=self.id,
             title=self.title,
             description=self.description,
             is_complete=self.check_completion()
             )
-        }
 
 
