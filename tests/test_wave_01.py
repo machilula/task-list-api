@@ -132,6 +132,8 @@ def test_update_task_not_found(client):
 
     # Assert
     assert response.status_code == 404
+    assert response_body == {"details": "task 1 not found"}
+    assert len(response_body) == 1
 
     # raise Exception("Complete test with assertion about response body")
     # *****************************************************************

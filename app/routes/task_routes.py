@@ -34,6 +34,30 @@ def validate_request(request_body):
 def get_all_tasks():
 
     query = db.select(Task)
+
+    title_param = request.args.get("title")
+    if title_param:
+        query = query.where(Task.title.ilike(f"%{title_param}"))
+    
+    description_param = request.args.get("description")
+    if description_param:
+        query = query.where(Task.description.ilike(f"%{description_param}%"))
+    
+    # sort_param = request.args.get("sort")
+    # if sort_param:
+    #     # attribute = getattr(Task, sort_param)
+    #     query = query.order_by(getattr(Task, sort_param))
+
+    sort_param = request.args.get("sort")
+    if sort_param == "asc":
+        query = query.order_by(Task.title)
+    if sort_param == "desc":
+        query = query.order_by(Task.title.desc())
+
+
+
+
+    
     tasks = db.session.scalars(query.order_by(Task.id))
 
     tasks_response = []
