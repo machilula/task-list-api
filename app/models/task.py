@@ -11,7 +11,7 @@ class Task(db.Model):
     def check_completion(self):
         if not self.completed_at:
             return False
-        return self.completed_at
+        return True
     
     def to_dict(self):
         return dict(

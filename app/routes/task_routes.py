@@ -1,10 +1,11 @@
 from flask import Blueprint, request, abort, make_response, Response
 from ..models.task import Task
+from datetime import date
 from ..db import db
 
-tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+bp = Blueprint("bp", __name__, url_prefix="/tasks")
 
-@tasks_bp.post("")
+@bp.post("")
 def create_task():
      
     request_body = request.get_json()
@@ -18,6 +19,8 @@ def create_task():
     }
     return response, 201
 
+
+
 def validate_request(request_body):
     try:
         title = request_body["title"]
@@ -30,10 +33,12 @@ def validate_request(request_body):
     task = Task(title=title, description=description)
     return task
 
-@tasks_bp.get("")
+@bp.get("")
 def get_all_tasks():
 
     query = db.select(Task)
+
+    # this function needs some tidying up
 
     title_param = request.args.get("title")
     if title_param:
@@ -42,11 +47,14 @@ def get_all_tasks():
     description_param = request.args.get("description")
     if description_param:
         query = query.where(Task.description.ilike(f"%{description_param}%"))
-    
-    # sort_param = request.args.get("sort")
-    # if sort_param:
-    #     # attribute = getattr(Task, sort_param)
+
+    # the code commented below works, but interferes with the logic of asc and desc
+    # elif sort_param:
     #     query = query.order_by(getattr(Task, sort_param))
+
+    # maybe we can do a try except helper function for this to include the code above
+    # going back to this, the filters helper in flasky wouldnt work for the code below
+    # the task model has no attribute "asc" or "desc"
 
     sort_param = request.args.get("sort")
     if sort_param == "asc":
@@ -54,25 +62,20 @@ def get_all_tasks():
     if sort_param == "desc":
         query = query.order_by(Task.title.desc())
 
-
-
-
-    
     tasks = db.session.scalars(query.order_by(Task.id))
 
-    tasks_response = []
-    for task in tasks:
-        tasks_response.append(
-            task.to_dict()
-        )
+    tasks_response = [task.to_dict() for task in tasks]
+
     return tasks_response
 
 
-@tasks_bp.get("<task_id>")
+@bp.get("<task_id>")
 def get_one_task(task_id):
     task = validate_task(task_id)
 
     return {'task': task.to_dict()}
+
+
 
 def validate_task(task_id):
     try:
@@ -91,7 +94,7 @@ def validate_task(task_id):
     return task
     
     # we need to make requests for put and delete to finish wave 1! lets do this!
-@tasks_bp.put("<task_id>")
+@bp.put("<task_id>")
 def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
@@ -103,7 +106,7 @@ def update_task(task_id):
 
     return {'task': task.to_dict()}
 
-@tasks_bp.delete("<task_id>")
+@bp.delete("<task_id>")
 def delete_task(task_id):
     task = validate_task(task_id)
 
@@ -114,9 +117,29 @@ def delete_task(task_id):
         "details": f'Task {task.id} "{task.title}" successfully deleted'
         }
 
+# heyyy stay with me, we are doing patch for wave 3 with a custom endpoint
+# lets create patch first, then worry about refactoring into route utilities
 
 
+@bp.patch("<task_id>/mark_complete")
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
 
+    task.completed_at = date.today()
+
+    db.session.commit()
+
+    return {'task': task.to_dict()}
+
+@bp.patch("<task_id>/mark_incomplete")
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+
+    db.session.commit()
+
+    return {'task': task.to_dict()}
 
 
     
