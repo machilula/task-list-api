@@ -2,6 +2,8 @@ from flask import Blueprint, request, abort, make_response, Response
 from ..models.task import Task
 from datetime import date
 from ..db import db
+import os
+import requests
 
 bp = Blueprint("bp", __name__, url_prefix="/tasks")
 
@@ -127,6 +129,8 @@ def mark_task_complete(task_id):
 
     task.completed_at = date.today()
 
+    slack_message = post_slack_message(task)
+
     db.session.commit()
 
     return {'task': task.to_dict()}
@@ -136,10 +140,29 @@ def mark_task_incomplete(task_id):
     task = validate_task(task_id)
 
     task.completed_at = None
-
     db.session.commit()
 
     return {'task': task.to_dict()}
+
+def post_slack_message(task):
+
+    path = "https://slack.com/api/chat.postMessage"
+
+    token = os.environ.get('SLACK_API_KEY')
+    headers = {
+        "Authorization": f'Bearer {token}'
+        }
+    post_message = {
+        "channel": "api-test-channel",
+        "text": f"Someone just completed the task {task.title}"
+        }
+    
+    response = requests.post(path, headers=headers, json=post_message)
+
+    return response
+
+
+
 
 
     
