@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from .route_utilities import create_model, validate_model
 from ..models.goal import Goal
+from ..models.task import Task
 from .route_utilities import create_model, validate_model, get_models_by_filters
 from ..db import db
 
@@ -38,8 +39,53 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return {
-        "details": f'Goal {goal.id} "{goal.title}" successfully deleted'
+        "details": f'{Goal.__name__} {goal.id} "{goal.title}" successfully deleted'
         }
 
+@bp.post("<goal_id>/tasks")
+def add_task_with_goal_id(goal_id):
+    goal = validate_model(Goal, goal_id)
+
+    request_body = request.get_json()
+
+    task_ids = []
+    for task_id in request_body["task_ids"]:
+        task = validate_model(Task, task_id)
+        task_ids.append(task.id)
+        goal.tasks.append(task)
+
+    db.session.commit()
+
+    return dict(
+        id=int(goal_id),
+        task_ids=task_ids
+    )
+
+@bp.get("<goal_id>/tasks")
+def get_tasks_by_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+    return dict(
+        id=goal.id,
+        title=goal.title,
+        tasks=[task.to_dict() for task in goal.tasks]
+    )
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# post for /goals/1/tasks
+
+# send a GET request to /goals/333/tasks

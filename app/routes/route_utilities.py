@@ -1,5 +1,7 @@
 from flask import abort, make_response
 from ..db import db
+import os
+import requests
 
 def create_model(cls, model_data):
     try:
@@ -47,3 +49,20 @@ def get_models_by_filters(cls, filters):
     models_response = [model.to_dict() for model in models]
 
     return models_response
+
+def post_slack_message(task):
+
+    path = "https://slack.com/api/chat.postMessage"
+
+    token = os.environ.get('SLACK_API_KEY')
+    headers = {
+        "Authorization": f'Bearer {token}'
+        }
+    post_message = {
+        "channel": "api-test-channel",
+        "text": f"Someone just completed the task {task.title}"
+        }
+    
+    response = requests.post(path, headers=headers, json=post_message)
+
+    return response

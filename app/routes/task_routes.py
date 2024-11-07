@@ -1,10 +1,8 @@
 from flask import Blueprint, request, abort, make_response, Response
 from ..models.task import Task
-from .route_utilities import create_model, validate_model, get_models_by_filters
+from .route_utilities import create_model, validate_model, get_models_by_filters, post_slack_message
 from datetime import date
 from ..db import db
-import os
-import requests
 
 bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -72,22 +70,7 @@ def mark_task_incomplete(task_id):
 
 # we might move the func below to route utilities
 
-def post_slack_message(task):
 
-    path = "https://slack.com/api/chat.postMessage"
-
-    token = os.environ.get('SLACK_API_KEY')
-    headers = {
-        "Authorization": f'Bearer {token}'
-        }
-    post_message = {
-        "channel": "api-test-channel",
-        "text": f"Someone just completed the task {task.title}"
-        }
-    
-    response = requests.post(path, headers=headers, json=post_message)
-
-    return response
 
 
 
