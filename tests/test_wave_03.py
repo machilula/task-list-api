@@ -127,7 +127,7 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"details": "task 1 not found"}
+    assert response_body == {"details": "Task 1 not found"}
     assert len(response_body) == 1
 
 
@@ -145,7 +145,7 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"details": "task 1 not found"}
+    assert response_body == {"details": "Task 1 not found"}
     assert len(response_body) == 1
 
 

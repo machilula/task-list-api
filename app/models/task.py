@@ -8,6 +8,13 @@ class Task(db.Model):
     description: Mapped[str]
     completed_at: Mapped[date] = mapped_column(nullable=True)
 
+    @classmethod
+    def from_dict(cls, task_data):
+        return cls(
+            title=task_data["title"],
+            description=task_data["description"],
+        )
+
     def check_completion(self):
         if not self.completed_at:
             return False
