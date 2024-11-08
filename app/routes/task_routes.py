@@ -40,7 +40,7 @@ def delete_task(task_id):
     db.session.commit()
 
     return {
-        "details": f'Task {task.id} "{task.title}" successfully deleted'
+        "details": f'{Task.__name__} {task.id} "{task.title}" successfully deleted'
         }
 
 @bp.patch("<task_id>/mark_complete")
