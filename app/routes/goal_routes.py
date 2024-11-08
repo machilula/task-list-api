@@ -64,28 +64,19 @@ def add_task_with_goal_id(goal_id):
 @bp.get("<goal_id>/tasks")
 def get_tasks_by_goal(goal_id):
     goal = validate_model(Goal, goal_id)
-    return dict(
-        id=goal.id,
-        title=goal.title,
-        tasks=[task.to_dict() for task in goal.tasks]
-    )
 
+    goal_dict = goal.to_dict()
+    goal_dict["tasks"] = [task.to_dict() for task in goal.tasks]
 
+    return goal_dict
 
+@bp.get("<goal_id>/tasks/<task_id>")
+def get_one_task_by_goal(goal_id, task_id):
 
+    goal = validate_model(Goal, goal_id)
+    task = validate_model(Task, task_id)
 
+    goal_dict = goal.to_dict()
+    goal_dict["task"] = task.to_dict() 
+    return goal_dict
 
-
-
-
-
-
-
-
-
-
-
-
-# post for /goals/1/tasks
-
-# send a GET request to /goals/333/tasks

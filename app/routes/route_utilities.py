@@ -34,6 +34,8 @@ def validate_model(cls, model_id):
 def get_models_by_filters(cls, filters):
     query = db.select(cls)
 
+    
+
     if filters:
         for attribute, value in filters.items():
             if hasattr(cls, attribute):

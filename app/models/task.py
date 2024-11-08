@@ -25,7 +25,7 @@ class Task(db.Model):
         return True
     
     def to_dict(self):
-        task_dict= dict(
+        task_dict = dict(
             id=self.id,
             title=self.title,
             description=self.description,

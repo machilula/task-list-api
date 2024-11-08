@@ -11,11 +11,9 @@ def create_task():
     request_body = request.get_json()
     return create_model(Task, request_body)
 
-
 @bp.get("")
 def get_all_tasks():
     return get_models_by_filters(Task, request.args)
-
 
 @bp.get("<task_id>")
 def get_one_task(task_id):
@@ -45,15 +43,13 @@ def delete_task(task_id):
         "details": f'Task {task.id} "{task.title}" successfully deleted'
         }
 
-
 @bp.patch("<task_id>/mark_complete")
 def mark_task_complete(task_id):
-    task = validate_model(Task, task_id)
 
+    task = validate_model(Task, task_id)
     task.completed_at = date.today()
 
     post_slack_message(task)
-
     db.session.commit()
 
     return {'task': task.to_dict()}
