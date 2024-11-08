@@ -75,8 +75,9 @@ def get_one_task_by_goal(goal_id, task_id):
 
     goal = validate_model(Goal, goal_id)
     task = validate_model(Task, task_id)
-
-    goal_dict = goal.to_dict()
-    goal_dict["task"] = task.to_dict() 
-    return goal_dict
-
+    
+    if task in goal.tasks:
+        goal_dict = goal.to_dict()
+        goal_dict["task"] = task.to_dict() 
+        return goal_dict
+    return {"details": f"Task {task.id} not found for Goal {goal.id}"}, 404
