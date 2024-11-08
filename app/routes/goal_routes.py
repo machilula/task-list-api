@@ -61,6 +61,21 @@ def add_task_with_goal_id(goal_id):
         task_ids=task_ids
     )
 
+# the route below does not work due to sharing the same endpoint as the one above
+
+@bp.post("<goal_id>/tasks")
+def create_task_with_goal_id(goal_id):
+
+    goal = validate_model(Goal, goal_id)
+    request_body = request.get_json()
+
+    task = create_model(Task, request_body)
+    goal.tasks.append(task)
+
+    db.session.commit()
+
+    return {f'goal': f'task {task.id} created and added to goal {goal.id}'}, 201
+
 @bp.get("<goal_id>/tasks")
 def get_tasks_by_goal(goal_id):
     goal = validate_model(Goal, goal_id)
@@ -75,8 +90,12 @@ def get_one_task_by_goal(goal_id, task_id):
 
     goal = validate_model(Goal, goal_id)
     task = validate_model(Task, task_id)
+    
+    if task in goal.tasks:
+        goal_dict = goal.to_dict()
+        goal_dict["task"] = task.to_dict() 
+        return goal_dict
+    return {"details": f"Task {task.id} not found for Goal {goal.id}"}, 404
 
-    goal_dict = goal.to_dict()
-    goal_dict["task"] = task.to_dict() 
-    return goal_dict
+
 
